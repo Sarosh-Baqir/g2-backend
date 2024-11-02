@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1729784053877,
+      "tag": "0000_createTables",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1729801511863,
+      "tag": "0001_alter_FK_DT",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1729803174725,
+      "tag": "0002_change_FK_all",
+      "breakpoints": true
+    }
+  ]
+}
