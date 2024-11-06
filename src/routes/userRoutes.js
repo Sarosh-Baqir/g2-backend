@@ -3,6 +3,7 @@ const {
   createUser,
   loginUser,
   assignAdmin,
+  refreshToken,
 } = require("../controllers/userController");
 const authenticateUser = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validateRequest");
@@ -20,6 +21,7 @@ router.post("/signup", validateRequest(signupValidationSchema), createUser);
 
 // Route to login a user
 router.post("/login", validateRequest(loginValidationSchema), loginUser);
+router.post("/refreshToken", refreshToken);
 
 // Route to assign admin role
 router.post(

@@ -6,6 +6,11 @@ const {
   getSentInvitations,
   getReceivedInvitations,
   respondToInvitation,
+  getAgencyDetails,
+  getAdminAgenciesByUserId,
+  editAgency,
+  deleteAgencyAndRelatedData,
+  deleteInvitation,
 } = require("../controllers/agencyController");
 const authenticateUser = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validateRequest");
@@ -29,6 +34,17 @@ router.post(
 
 // Get all agencies
 router.get("/", authenticateUser, getAgencies);
+
+// Edit agency
+router.post("/edit", authenticateUser, editAgency);
+
+router.post("/delete", authenticateUser, deleteAgencyAndRelatedData);
+router.post("/deleteInvitation", authenticateUser, deleteInvitation);
+// Get agencies where admin
+router.get("/adminAgencies", authenticateUser, getAdminAgenciesByUserId);
+
+// Get the details of each agency
+router.get("/details", authenticateUser, getAgencyDetails);
 
 // Invite a user to an agency
 router.post(

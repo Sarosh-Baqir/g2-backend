@@ -3,6 +3,8 @@ const router = express.Router();
 const {
   createProject,
   getUserProjects,
+  getProjectDetails,
+  deleteProject,
 } = require("../controllers/projectController");
 const authenticateUser = require("../middlewares/authMiddleware");
 const validateRequest = require("../middlewares/validateRequest");
@@ -17,5 +19,9 @@ router.post(
   createProject
 );
 router.get("/", authenticateUser, getUserProjects);
+// Get the details of each project
+router.get("/details", authenticateUser, getProjectDetails);
+
+router.post("/delete", authenticateUser, deleteProject);
 
 module.exports = router;

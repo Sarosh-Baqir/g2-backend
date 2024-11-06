@@ -10,7 +10,8 @@ const authenticateUser = (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1]; // Extract token
-  console.log("token: ", token);
+  // console.log("hello");
+  // console.log("token: ", token);
 
   try {
     // Verify token
@@ -18,7 +19,7 @@ const authenticateUser = (req, res, next) => {
 
     // Attach the userId to the request object
     req.userId = decoded.userId;
-    console.log("id: ", req.userId);
+    //console.log("id: ", req.userId);
 
     next();
   } catch (error) {

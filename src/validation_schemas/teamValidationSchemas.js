@@ -7,7 +7,9 @@ const createTeamSchema = z.object({
     .string()
     .min(2, { message: "Team name must be at least 2 characters long" }),
   agency_id: z.string().uuid({ message: "Invalid agency ID" }),
-  team_lead_user_id: z.string().uuid({ message: "Invalid team lead user ID" }),
+  team_lead_email: z
+    .string()
+    .email({ message: "Invalid email format for team lead" }), // Validate email format for team lead
   members: z
     .array(z.string().email({ message: "Each member must be a valid email" }))
     .optional(),

@@ -8,7 +8,7 @@ const createAgencySchema = z.object({
 // Schema for inviting a user to an agency
 const inviteUserToAgencySchema = z.object({
   recipient_email: z.string().email({ message: "Invalid email format" }),
-  agency_id: z.string().uuid({ message: "Invalid agency ID format" }),
+  agency_name: z.string().min(1, { message: "Agency name is required" }),
 });
 
 // Schema for responding to an invitation

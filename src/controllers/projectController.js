@@ -4,6 +4,7 @@ const { project } = require("../../db/schema/Project");
 const { team } = require("../../db/schema/team");
 const { agencyUser: agencyUserTable } = require("../../db/schema/agencyUser");
 const { teamUser } = require("../../db/schema/teamUser");
+const { user } = require("../../db/schema/user");
 const generateUUID = require("../utils/uuid");
 
 const createProject = async (req, res) => {
@@ -63,7 +64,7 @@ const createProject = async (req, res) => {
         })
         .returning();
 
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: "Project created successfully by Admin",
         project: newProject[0],
@@ -96,7 +97,7 @@ const createProject = async (req, res) => {
         })
         .returning();
 
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: "Project created successfully by Team-lead",
         project: newProject[0],
@@ -126,17 +127,23 @@ const getUserProjects = async (req, res) => {
         project_id: project.project_id,
         project_name: project.project_name,
         created_by_user_id: project.created_by_user_id,
-        assigned_team_id: project.assigned_team_id,
+        created_by_user_name: user.name,
+        created_by_user_email: user.email,
+        assigned_team_id: team.team_id,
+        assigned_team_name: team.team_name,
+        team_members: teamUser.user_id, // This will contain IDs of team members
       })
       .from(project)
       .leftJoin(team, eq(project.assigned_team_id, team.team_id))
       .leftJoin(teamUser, eq(teamUser.team_id, team.team_id))
+      .leftJoin(user, eq(project.created_by_user_id, user.user_id))
       .where(
         or(
           eq(project.created_by_user_id, userId), // User is creator of the project
           eq(teamUser.user_id, userId) // User is part of the assigned team
         )
       );
+
     console.log("projects: ", projects);
 
     // Remove duplicate projects based on project_id
@@ -147,8 +154,7 @@ const getUserProjects = async (req, res) => {
 
     // Step 2: Check if any projects were found
     if (uniqueProjects.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(201).json({
         message: "No projects found for the user",
       });
     }
@@ -168,7 +174,71 @@ const getUserProjects = async (req, res) => {
   }
 };
 
+const getProjectDetails = async (req, res) => {
+  console.log("Fetching project details...");
+  const { project_id } = req.query; // Fetching project_id from query parameters
+  console.log("project_id: ", project_id);
+
+  try {
+    // Step 1: Get the project information along with team and user details
+    const projectDetails = await database
+      .select({
+        project_id: project.project_id,
+        project_name: project.project_name,
+        created_at: project.createdAt,
+        updated_at: project.updatedAt,
+        assigned_team_id: team.team_id,
+        assigned_team_name: team.team_name,
+        created_by_user_id: user.user_id,
+        created_by_user_name: user.name,
+        created_by_user_email: user.email,
+      })
+      .from(project)
+      .innerJoin(team, eq(project.assigned_team_id, team.team_id))
+      .innerJoin(user, eq(project.created_by_user_id, user.user_id))
+      .where(eq(project.project_id, project_id));
+
+    console.log("Project Details: ", projectDetails);
+
+    if (projectDetails.length === 0) {
+      return res.status(201).json({ message: "Project not found" });
+    }
+
+    // Final result
+    const result = projectDetails[0]; // Since we're expecting one project detail
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching project details:", error);
+    res.status(500).json({ message: "Failed to fetch project details" });
+  }
+};
+
+const deleteProject = async (req, res) => {
+  console.log("in delete controller");
+  const { projectId } = req.body;
+
+  console.log("projectId: ", projectId);
+
+  try {
+    const deletedProj = await database
+      .delete(project)
+      .where(eq(project.project_id, projectId))
+      .returning();
+    console.log("deleted project: ", deletedProj);
+    res.status(200).json(deletedProj);
+  } catch (error) {
+    console.error("Error deleting project data:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete project data.",
+    });
+  }
+};
+
 module.exports = {
   createProject,
   getUserProjects,
+  getProjectDetails,
+  deleteProject,
 };

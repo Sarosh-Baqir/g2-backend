@@ -48,10 +48,14 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Incorrect credentials!" });
     }
 
-    const token = generateToken(User[0]);
+    //const token = generateToken(User[0]);
+    // Generate tokens
+    const accessToken = generateAccessToken(User[0]);
+    const refreshToken = generateRefreshToken(User[0]);
     res.status(200).json({
       message: "Login successful",
-      token,
+      accessToken,
+      refreshToken,
       user: { id: User[0].user_id, email: User[0].email },
     });
   } catch (error) {
@@ -60,11 +64,50 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Function to generate JWT token
-const generateToken = (user) => {
+// Generate Access Token
+const generateAccessToken = (user) => {
   return jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1h", // Set a short expiration time for access tokens
   });
+};
+
+// Generate Refresh Token
+const generateRefreshToken = (user) => {
+  return jwt.sign({ userId: user.user_id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: "2h", // Set a longer expiration time for refresh tokens
+  });
+};
+
+const refreshToken = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token)
+    return res.status(403).json({ message: "Refresh token required" });
+
+  try {
+    // Verify refresh token
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    // Generate new tokens
+    const newAccessToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    const newRefreshToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
 };
 
 const assignAdmin = async (req, res) => {
@@ -136,4 +179,5 @@ module.exports = {
   createUser,
   loginUser,
   assignAdmin,
+  refreshToken,
 };
