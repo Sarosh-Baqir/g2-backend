@@ -358,12 +358,12 @@ exports.getSentInvitations = async (req, res) => {
       .innerJoin(user, eq(invitation.recipient_user_id, user.user_id))
       .innerJoin(agency, eq(invitation.agency_id, agency.agency_id));
     if (sentInvitations.length == 0) {
-      res
+      return res
         .status(201)
         .json({ message: "You have no sent invitation", invitations: [] });
     }
 
-    res.status(200).json({ invitations: sentInvitations });
+    return res.status(200).json({ invitations: sentInvitations });
   } catch (error) {
     console.error("Error fetching sent invitations:", error);
     res.status(500).json({ message: "Server error", error });
@@ -397,7 +397,7 @@ exports.getReceivedInvitations = async (req, res) => {
         .json({ message: "You have no received invitation", invitations: [] });
     }
 
-    res.status(200).json({ invitations: receivedInvitations });
+    return res.status(200).json({ invitations: receivedInvitations });
   } catch (error) {
     console.error("Error fetching sent invitations:", error);
     res.status(500).json({ message: "Server error", error });
@@ -448,7 +448,7 @@ exports.respondToInvitation = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: `Invitation ${response} successfully`,
       status: updatedStatus,
     });
